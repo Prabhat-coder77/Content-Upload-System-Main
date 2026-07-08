@@ -4,7 +4,6 @@ A full-stack course content management platform. Users can upload, manage, and d
 
 ---
 
-## [YouTube Link](https://youtu.be/cdT9LzLlQ-k)
 
 # [Live Demo](http://3.94.111.96)
 
