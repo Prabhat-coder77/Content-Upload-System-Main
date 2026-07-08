@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: ccu-postgres
+    environment:
+      POSTGRES_USER: ccu_user
+      POSTGRES_PASSWORD: ccu_password
+      POSTGRES_DB: coursecontent
+    ports:
+      - "5432:5432"
+    volumes:
+      - ccu-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ccu_user -d coursecontent" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: ccu-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=coursecontent
+      - DB_USER=ccu_user
+      - DB_PASSWORD=ccu_password
+      - STORAGE_LOCAL_ROOT=/app/uploads
+      - JWT_SECRET=superSecretKeyThatShouldBeChangedInProductionToSomethingLong
+    volumes:
+      - ccu-local-uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  ccu-postgres-data:
+  ccu-local-uploads:

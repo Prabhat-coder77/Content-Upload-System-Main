@@ -1,0 +1,12 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+app:
+  storage:
+    type: S3
+    s3:
+      bucket: ${S3_BUCKET:ccu-storage-new}
+      prefix: ${S3_PREFIX:uploads/}
+      region: ${S3_REGION:us-east-1}

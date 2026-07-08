@@ -1,0 +1,9 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+app:
+  storage:
+    local:
+      root: ${STORAGE_LOCAL_ROOT:/tmp/ccu_uploads}

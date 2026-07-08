@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: ccu-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-ccu_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-ccu_password}
+      POSTGRES_DB: ${DB_NAME:-coursecontent}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ccu-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./ccu-backend
+      dockerfile: Dockerfile
+    container_name: ccu-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    # All env vars (DB, JWT, CORS, S3, Storage, File limits) come from .env
+    env_file:
+      - .env
+    # DB_HOST must point to the docker service name, not localhost
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+    volumes:
+      - ccu-local-uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./ccu-frontend
+      dockerfile: Dockerfile
+    container_name: ccu-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  ccu-postgres-data:
+  ccu-local-uploads:
